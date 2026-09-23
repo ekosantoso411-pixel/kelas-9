@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Ujian - Kelas 9</title>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* TEMA WARNA KELAS 9: UNGU NEON (PURPLE) */
+    :root {
+      --primary-color: #d400ff;
+      --primary-glow: rgba(212, 0, 255, 0.4);
+      --box-bg-top: #1a0a28;
+      --box-bg-bottom: #0e0514;
+      --hover-bg-top: #2a0d3d;
+      --hover-bg-bottom: #3d165d;
+      --border-color: rgba(212, 0, 255, 0.35);
+    }
+
+    body {
+      background-color: #0b040d;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .top-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      position: absolute;
+      top: 0;
+      z-index: 10;
+    }
+
+    .user-badge {
+      background: rgba(20, 10, 30, 0.8);
+      border: 1px solid var(--primary-glow);
+      padding: 8px 16px;
+      border-radius: 20px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logout-btn {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.3);
+      color: white;
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    }
+
+    #background-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .clock-card {
+      margin-top: 80px;
+      margin-bottom: 5px;
+      padding: 12px 30px;
+      background: rgba(20, 10, 30, 0.75);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), inset 0 0 15px var(--primary-glow);
+      text-align: center;
+      z-index: 1;
+    }
+
+    .clock-title {
+      font-size: 11px;
+      color: var(--primary-color);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .clock-time {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      font-family: 'Courier New', Courier, monospace;
+      text-shadow: 0 0 12px var(--primary-glow);
+      letter-spacing: 2px;
+    }
+
+    .clock-date {
+      font-size: 13px;
+      color: #a0aec0;
+      margin-top: 3px;
+      letter-spacing: 0.5px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      font-size: clamp(1.2rem, 3vw, 1.5rem);
+      font-weight: 700;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      text-shadow: 0 0 8px var(--primary-glow);
+      z-index: 1;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 25px;
+      justify-content: center;
+      max-width: 900px;
+      z-index: 1;
+      background: rgba(20, 10, 30, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(212, 0, 255, 0.2);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(212, 0, 255, 0.05);
+      margin-bottom: 40px;
+      width: 90%;
+    }
+
+    .subject-box {
+      width: 100%;
+      max-width: 200px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--box-bg-bottom) 0%, var(--box-bg-top) 100%);
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      border: 1px solid rgba(212, 0, 255, 0.3);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .subject-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+      opacity: 0.5;
+    }
+
+    .subject-box:hover {
+      background: linear-gradient(135deg, var(--hover-bg-bottom) 0%, var(--hover-bg-top) 100%);
+      color: #ffffff;
+      transform: translateY(-5px) scale(1.02);
+      border-color: var(--primary-color);
+      box-shadow: 0 8px 25px var(--primary-glow), 0 0 10px rgba(212, 0, 255, 0.2);
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 600px) {
+      .subject-box { max-width: 100%; height: 70px; }
+      .top-bar { padding: 15px; }
+      .clock-card { margin-top: 70px; }
+    }
+  </style>
+</head>
+<body>
+  
+  <canvas id="background-canvas"></canvas>
+
+  <div class="top-bar">
+    <div class="user-badge">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/></svg>
+      <span id="student-name">Peserta Ujian</span>
+    </div>
+    <a href="#" class="logout-btn" onclick="logout()">Keluar</a>
+  </div>
+
+  <div class="clock-card">
+    <div class="clock-title">WAKTU SEKARANG</div>
+    <div id="live-time" class="clock-time">00:00:00 WIB</div>
+    <div id="live-date" class="clock-date">Loading tanggal...</div>
+  </div>
+
+  <h1>JADWAL UJIAN KELAS 9</h1>
+
+  <div class="container">
+    <a class="subject-box hidden" 
+       href="https://forms.gle/FQFeybxyBaFXYG5n8" 
+       data-release="2026-09-17T10:00:00" 
+       data-expire="2026-09-20T18:00:00">UJI COBA</a>
+
+    <a class="subject-box hidden" 
+       href="https://forms.gle/8X1bJSziSbgXBsYV7" 
+       data-release="2026-09-23T11:00:00" 
+       data-expire="2026-09-23T15:00:00">BAHASA INDONESIA</a>
+    
+    <a class="subject-box hidden" 
+       href="https://forms.gle/PsyQ6W8T3F27gEqp9" 
+       data-release="2026-09-23T11:00:00" 
+       data-expire="2026-09-23T15:00:00">PAI</a>
+
+    <a class="subject-box hidden" 
+       href="https://forms.gle/8deWExsyTWw36kEt5" 
+       data-release="2026-09-23T11:00:00" 
+       data-expire="2026-09-23T15:00:00">MATEMATIKA</a>
+
+    <a class="subject-box hidden" 
+       href="https://forms.gle/GVAbneuYZoE3PpNq9" 
+       data-release="2026-09-23T11:00:00" 
+       data-expire="2026-09-23T15:00:00">BAHASA JAWA</a>    
+
+    <a class="subject-box hidden" 
+       href="https://forms.gle/PWNJPi2YRxX4fWuNA" 
+       data-release="2026-09-23T07:20:00" 
+       data-expire="2026-09-23T15:00:00">IPA</a>    
+
+    <a class="subject-box hidden" 
+       href="https://forms.gle/DvN3ic6dqSvgcADu5" 
+       data-release="2025-09-23T09:20:00" 
+       data-expire="2025-09-23T15:00:00">KEMUHAMMADIYAHAN</a>    
+    
+    <a class="subject-box hidden" 
+       href="..." 
+       data-release="2026-09-24T07:20:00" 
+       data-expire="2026-09-24T15:00:00">BAHASA INGGRIS</a>    
+
+    <a class="subject-box hidden" 
+       href="..." 
+       data-release="2026-09-24T09:20:00" 
+       data-expire="2026-09-24T15:00:00">PENDIDIKAN PANCASILA</a>    
+    
+    <a class="subject-box hidden" 
+       href="..." 
+       data-release="2026-09-25T07:20:00" 
+       data-expire="2026-09-25T15:00:00">IPS</a> 
+    
+    <a class="subject-box hidden" 
+       href="..." 
+       data-release="2026-09-25T09:20:00" 
+       data-expire="2026-09-25T15:00:00">INFORMATIKA</a>    
+
+    <a class="subject-box hidden" 
+       href="..." 
+       data-release="2026-09-28T07:20:00" 
+       data-expire="2026-09-28T15:00:00">PJOK</a>
+    
+    <a class="subject-box hidden" 
+       href="..." 
+       data-release="2026-09-28T09:20:00" 
+       data-expire="2026-09-28T15:00:00">BAHASA ARAB</a>    
+    
+    <a class="subject-box hidden" 
+       href="..." 
+       data-release="2026-09-29T07:20:00" 
+       data-expire="2026-09-29T15:00:00">SENI RUPA</a>
+    
+    <a class="subject-box hidden" 
+       href="..." 
+       data-release="2026-06-29T09:10:00" 
+       data-expire="2026-06-29T15:00:00">SENI MUSIK</a>
+    
+    <a class="subject-box hidden" 
+       href="..." 
+       data-release="2026-06-29T10:10:00" 
+       data-expire="2026-06-29T15:00:00">KKA</a>     
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const nama = sessionStorage.getItem("userNama");
+      if (nama) { document.getElementById("student-name").textContent = nama; }
+    });
+
+    function logout() {
+      sessionStorage.removeItem("userNama");
+      window.location.href = "https://cbtsmpmuh2depok.blogspot.com"; 
+    }
+
+    function updateLiveClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const timeEl = document.getElementById('live-time');
+      if (timeEl) timeEl.textContent = `${hours}:${minutes}:${seconds} WIB`;
+
+      const dateEl = document.getElementById('live-date');
+      if (dateEl) {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dateEl.textContent = now.toLocaleDateString('id-ID', options);
+      }
+    }
+
+    function updateSubjectLinks() {
+      const now = new Date();
+      const links = document.querySelectorAll('.subject-box');
+      links.forEach(link => {
+        const releaseTime = new Date(link.getAttribute('data-release'));
+        const expireTime = new Date(link.getAttribute('data-expire'));
+        if (now >= releaseTime && now < expireTime) {
+          link.classList.remove('hidden');
+        } else {
+          link.classList.add('hidden');
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      updateLiveClock();
+      updateSubjectLinks();
+      setInterval(updateLiveClock, 1000);
+      setInterval(updateSubjectLinks, 5000); 
+    });
+
+    // --- STREAMING_CHUNK:Initializing Canvas Animation... ---
+    const canvas = document.getElementById('background-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+    const connectionDistance = 150;
+
+    function resizeCanvas() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.vx = (Math.random() - 0.5) * 0.5;
+        this.vy = (Math.random() - 0.5) * 0.5;
+        this.radius = Math.random() * 2 + 1;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0 || this.x > width) this.vx *= -1;
+        if (this.y < 0 || this.y > height) this.vy *= -1;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(212, 0, 255, 0.8)'; // Ungu Kelas 9
+        ctx.fill();
+      }
+    }
+
+    function initParticles() {
+      particles = [];
+      const numberOfParticles = (width * height) / 25000;
+      for (let i = 0; i < numberOfParticles; i++) particles.push(new Particle());
+    }
+
+    function drawConnections() {
+      for (let a = 0; a < particles.length; a++) {
+        for (let b = a; b < particles.length; b++) {
+          let dx = particles[a].x - particles[b].x;
+          let dy = particles[a].y - particles[b].y;
+          let distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < connectionDistance) {
+            ctx.beginPath();
+            ctx.moveTo(particles[a].x, particles[a].y);
+            ctx.lineTo(particles[b].x, particles[b].y);
+            let opacity = 1 - (distance / connectionDistance);
+            ctx.strokeStyle = `rgba(212, 0, 255, ${opacity * 0.3})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function drawGrid() {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+        ctx.lineWidth = 1;
+        const gridSize = 50;
+        ctx.beginPath();
+        for (let x = 0; x <= width; x += gridSize) { ctx.moveTo(x, 0); ctx.lineTo(x, height); }
+        for (let y = 0; y <= height; y += gridSize) { ctx.moveTo(0, y); ctx.lineTo(width, height); }
+        ctx.stroke();
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      ctx.clearRect(0, 0, width, height);
+      drawGrid();
+      particles.forEach(particle => { particle.update(); particle.draw(); });
+      drawConnections();
+    }
+
+    window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+    window.onload = function() { resizeCanvas(); initParticles(); animate(); };
+  </script>
+</body>
+</html>
