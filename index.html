@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Ujian - Kelas 9</title>
+  <title>Dashboard Ujian - Kelas 7</title>
   
   <style>
     * {
@@ -13,19 +13,17 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    /* TEMA WARNA KELAS 9: UNGU NEON (PURPLE) */
     :root {
-      --primary-color: #d400ff;
-      --primary-glow: rgba(212, 0, 255, 0.4);
-      --box-bg-top: #1a0a28;
-      --box-bg-bottom: #0e0514;
-      --hover-bg-top: #2a0d3d;
-      --hover-bg-bottom: #3d165d;
-      --border-color: rgba(212, 0, 255, 0.35);
+      --primary-color: #00c3ff;
+      --primary-glow: rgba(0, 195, 255, 0.4);
+      --box-bg-top: #0a1428;
+      --box-bg-bottom: #050a14;
+      --hover-bg-top: #0d1e3d;
+      --hover-bg-bottom: #162f5d;
     }
 
     body {
-      background-color: #0b040d;
+      background-color: #050a14;
       color: #e0e0e0;
       min-height: 100vh;
       display: flex;
@@ -33,6 +31,16 @@
       align-items: center;
       position: relative;
       overflow-x: hidden;
+    }
+
+    #background-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
     }
 
     .top-bar {
@@ -47,7 +55,7 @@
     }
 
     .user-badge {
-      background: rgba(20, 10, 30, 0.8);
+      background: rgba(10, 15, 30, 0.8);
       border: 1px solid var(--primary-glow);
       padding: 8px 16px;
       border-radius: 20px;
@@ -79,23 +87,13 @@
       box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
     }
 
-    #background-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      pointer-events: none;
-    }
-
     .clock-card {
       margin-top: 80px;
       margin-bottom: 5px;
       padding: 12px 30px;
-      background: rgba(20, 10, 30, 0.75);
+      background: rgba(10, 15, 30, 0.75);
       backdrop-filter: blur(10px);
-      border: 1px solid var(--border-color);
+      border: 1px solid rgba(0, 195, 255, 0.35);
       border-radius: 12px;
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), inset 0 0 15px var(--primary-glow);
       text-align: center;
@@ -148,34 +146,38 @@
       justify-content: center;
       max-width: 900px;
       z-index: 1;
-      background: rgba(20, 10, 30, 0.7);
+      background: rgba(10, 15, 30, 0.7);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(212, 0, 255, 0.2);
+      border: 1px solid rgba(0, 195, 255, 0.2);
       border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(212, 0, 255, 0.05);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 195, 255, 0.05);
       margin-bottom: 40px;
       width: 90%;
+      min-height: 200px;
     }
 
     .subject-box {
       width: 100%;
       max-width: 200px;
-      height: 80px;
+      height: 90px;
       background: linear-gradient(135deg, var(--box-bg-bottom) 0%, var(--box-bg-top) 100%);
       color: var(--primary-color);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      font-size: 16px;
-      font-weight: 600;
+      font-size: 15px;
+      font-weight: 700;
       border-radius: 10px;
       transition: all 0.3s ease;
       text-decoration: none;
-      border: 1px solid rgba(212, 0, 255, 0.3);
+      border: 1px solid rgba(0, 195, 255, 0.3);
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       position: relative;
       overflow: hidden;
+      cursor: pointer;
+      padding: 10px;
     }
 
     .subject-box::before {
@@ -189,20 +191,173 @@
       opacity: 0.5;
     }
 
-    .subject-box:hover {
+    .subject-box:hover:not(.locked) {
       background: linear-gradient(135deg, var(--hover-bg-bottom) 0%, var(--hover-bg-top) 100%);
       color: #ffffff;
       transform: translateY(-5px) scale(1.02);
       border-color: var(--primary-color);
-      box-shadow: 0 8px 25px var(--primary-glow), 0 0 10px rgba(212, 0, 255, 0.2);
+      box-shadow: 0 8px 25px var(--primary-glow), 0 0 10px rgba(0, 195, 255, 0.2);
+    }
+
+    .subject-box.locked {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #64748b;
+      border: 1px solid #334155;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    
+    .subject-box.locked::before {
+      display: none;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      margin-top: 8px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .status-open { background: rgba(0, 195, 255, 0.15); color: #00c3ff; border: 1px solid rgba(0,195,255,0.3); }
+    .status-waiting { background: rgba(245, 158, 11, 0.1); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-closed { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    .loading-text {
+      color: var(--primary-color);
+      font-size: 16px;
+      font-weight: 600;
+      animation: pulse 1.5s infinite;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      gap: 10px;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+
+    #exam-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #050a14;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .exam-header {
+      height: 60px;
+      background: rgba(10, 20, 40, 0.95);
+      border-bottom: 1px solid var(--primary-glow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .exam-title-badge {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary-color);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .exam-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #e0e0e0;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    .exam-iframe-container {
+      flex: 1;
+      width: 100%;
+      height: calc(100vh - 60px);
+      background-color: #ffffff;
+    }
+
+    .exam-iframe-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
 
     .hidden { display: none !important; }
 
+    #custom-confirm-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(5, 10, 20, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 10000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .confirm-box {
+      background: linear-gradient(135deg, var(--box-bg-bottom) 0%, var(--box-bg-top) 100%);
+      border: 1px solid var(--primary-color);
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 195, 255, 0.2);
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .confirm-box p {
+      margin-bottom: 25px;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+      line-height: 1.5;
+    }
+
+    .confirm-actions {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
     @media (max-width: 600px) {
-      .subject-box { max-width: 100%; height: 70px; }
+      .subject-box { max-width: 100%; height: 80px; }
       .top-bar { padding: 15px; }
       .clock-card { margin-top: 70px; }
+      .exam-header { padding: 0 10px; }
+      .exam-title-badge { font-size: 12px; }
     }
   </style>
 </head>
@@ -215,7 +370,7 @@
       <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/></svg>
       <span id="student-name">Peserta Ujian</span>
     </div>
-    <a href="#" class="logout-btn" onclick="logout()">Keluar</a>
+    <a href="#" class="logout-btn" onclick="requestLogout()">Keluar</a>
   </div>
 
   <div class="clock-card">
@@ -226,97 +381,317 @@
 
   <h1>JADWAL UJIAN KELAS 9</h1>
 
-  <div class="container">
-    <a class="subject-box hidden" 
-       href="https://forms.gle/FQFeybxyBaFXYG5n8" 
-       data-release="2026-09-17T10:00:00" 
-       data-expire="2026-09-20T18:00:00">UJI COBA</a>
+  <!-- Kontainer Jadwal -->
+  <div class="container" id="jadwal-container">
+    <div class="loading-text" id="loading-indicator">
+      <span>Menyinkronkan jadwal ujian...</span>
+      <span style="font-size: 12px; color: #a0aec0; font-weight: 400;">Membaca data dari Google Sheet</span>
+    </div>
+  </div>
 
-    <a class="subject-box hidden" 
-       href="https://forms.gle/8X1bJSziSbgXBsYV7" 
-       data-release="2026-09-23T11:00:00" 
-       data-expire="2026-09-23T15:00:00">BAHASA INDONESIA</a>
-    
-    <a class="subject-box hidden" 
-       href="https://forms.gle/PsyQ6W8T3F27gEqp9" 
-       data-release="2026-09-23T11:00:00" 
-       data-expire="2026-09-23T15:00:00">PAI</a>
+  <div id="exam-modal" class="hidden">
+    <div class="exam-header">
+      <div class="exam-title-badge" id="exam-title-display">UJIAN ONLINE</div>
+      <div class="exam-actions">
+        <button class="back-btn" onclick="requestCloseExam()">← Kembali</button>
+        <button class="logout-btn" onclick="requestLogout()">Keluar</button>
+      </div>
+    </div>
+    <div class="exam-iframe-container">
+      <iframe id="exam-iframe" src="" allow="autoplay"></iframe>
+    </div>
+  </div>
 
-    <a class="subject-box hidden" 
-       href="https://forms.gle/8deWExsyTWw36kEt5" 
-       data-release="2026-09-23T11:00:00" 
-       data-expire="2026-09-23T15:00:00">MATEMATIKA</a>
-
-    <a class="subject-box hidden" 
-       href="https://forms.gle/GVAbneuYZoE3PpNq9" 
-       data-release="2026-09-23T11:00:00" 
-       data-expire="2026-09-23T15:00:00">BAHASA JAWA</a>    
-
-    <a class="subject-box hidden" 
-       href="https://forms.gle/PWNJPi2YRxX4fWuNA" 
-       data-release="2026-09-23T07:20:00" 
-       data-expire="2026-09-23T15:00:00">IPA</a>    
-
-    <a class="subject-box hidden" 
-       href="https://forms.gle/DvN3ic6dqSvgcADu5" 
-       data-release="2025-09-23T09:20:00" 
-       data-expire="2025-09-23T15:00:00">KEMUHAMMADIYAHAN</a>    
-    
-    <a class="subject-box hidden" 
-       href="..." 
-       data-release="2026-09-24T07:20:00" 
-       data-expire="2026-09-24T15:00:00">BAHASA INGGRIS</a>    
-
-    <a class="subject-box hidden" 
-       href="..." 
-       data-release="2026-09-24T09:20:00" 
-       data-expire="2026-09-24T15:00:00">PENDIDIKAN PANCASILA</a>    
-    
-    <a class="subject-box hidden" 
-       href="..." 
-       data-release="2026-09-25T07:20:00" 
-       data-expire="2026-09-25T15:00:00">IPS</a> 
-    
-    <a class="subject-box hidden" 
-       href="..." 
-       data-release="2026-09-25T09:20:00" 
-       data-expire="2026-09-25T15:00:00">INFORMATIKA</a>    
-
-    <a class="subject-box hidden" 
-       href="..." 
-       data-release="2026-09-28T07:20:00" 
-       data-expire="2026-09-28T15:00:00">PJOK</a>
-    
-    <a class="subject-box hidden" 
-       href="..." 
-       data-release="2026-09-28T09:20:00" 
-       data-expire="2026-09-28T15:00:00">BAHASA ARAB</a>    
-    
-    <a class="subject-box hidden" 
-       href="..." 
-       data-release="2026-09-29T07:20:00" 
-       data-expire="2026-09-29T15:00:00">SENI RUPA</a>
-    
-    <a class="subject-box hidden" 
-       href="..." 
-       data-release="2026-06-29T09:10:00" 
-       data-expire="2026-06-29T15:00:00">SENI MUSIK</a>
-    
-    <a class="subject-box hidden" 
-       href="..." 
-       data-release="2026-06-29T10:10:00" 
-       data-expire="2026-06-29T15:00:00">KKA</a>     
+  <!-- Modal Custom untuk Peringatan (Menggantikan Alert) -->
+  <div id="custom-confirm-modal" class="hidden">
+    <div class="confirm-box">
+      <p id="confirm-message">Pesan peringatan</p>
+      <div class="confirm-actions">
+        <button class="back-btn" id="confirm-cancel-btn" onclick="closeConfirmModal()">Batal</button>
+        <button class="logout-btn" id="confirm-yes-btn">Ya</button>
+      </div>
+    </div>
   </div>
 
   <script>
+    // URL CSV langsung dari pengguna
+    const googleSheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTBV8pMvYqvh8oHk3wfpJB854-Q77h3geM0oCW7YFRe6NTzdx0M5t9hxw711Is_vEYuecNVOZ6r5nn2/pub?gid=2096748689&single=true&output=csv';
+
+    // Menyimpan data jadwal mentah dari server
+    let scheduleData = []; 
+    let isFetching = false;
+
     document.addEventListener("DOMContentLoaded", () => {
       const nama = sessionStorage.getItem("userNama");
-      if (nama) { document.getElementById("student-name").textContent = nama; }
+      if (nama) {
+        const nameElement = document.getElementById("student-name");
+        if (nameElement) nameElement.textContent = nama;
+      }
+
+      updateLiveClock();
+      fetchSchedule(); // Ambil data segera
+      
+      setInterval(updateLiveClock, 1000); // Update jam 1 detik
+      setInterval(renderSchedule, 1000);  // Cek buka/tutup ujian 1 detik
+      setInterval(fetchSchedule, 30000);  // Sync ulang dari sheet 30 detik
     });
 
-    function logout() {
-      sessionStorage.removeItem("userNama");
-      window.location.href = "https://ekosantoso411-pixel.github.io/portal-login/"; 
+    // Pemisah CSV yang tahan banting, menangani koma dalam tanda kutip dan \r
+    function parseCSVLine(text) {
+      let ret = [];
+      let inQuote = false;
+      let value = '';
+      // Bersihkan tanda \r yang tersembunyi dari Windows/Sheet
+      text = text.replace(/\r/g, ''); 
+      
+      for (let i = 0; i < text.length; i++) {
+        let ch = text[i];
+        if (inQuote) {
+          if (ch === '"') {
+            if (i + 1 < text.length && text[i+1] === '"') { value += '"'; i++; } 
+            else { inQuote = false; }
+          } else { value += ch; }
+        } else {
+          if (ch === '"') { inQuote = true; }
+          else if (ch === ',') { ret.push(value.trim()); value = ''; }
+          else { value += ch; }
+        }
+      }
+      ret.push(value.trim());
+      return ret;
+    }
+
+    // Pembaca format tanggal yang lebih pintar (Support Format Indonesia)
+    function parseCustomDate(dateStr) {
+      if (!dateStr || dateStr.trim() === '') return null;
+      let str = dateStr.trim();
+      
+      // 1. Coba format standar internasional dulu
+      let d = new Date(str);
+      if (!isNaN(d.getTime()) && str.includes('T')) return d;
+
+      // 2. Jika gagal, coba pecah manual format Indonesia (DD/MM/YYYY HH:mm:ss atau YYYY-MM-DD HH:mm)
+      let parts = str.split(/[\sT]+/); // Pisahkan tanggal dan jam
+      if (parts.length >= 1) {
+        let datePart = parts[0];
+        let timePart = parts[1] || "00:00:00"; // Jika tidak ada jam, anggap 00:00:00
+        
+        let dateTokens = datePart.split(/[-/]/); // Pemisah bisa - atau /
+        
+        if (dateTokens.length === 3) {
+          let year, month, day;
+          
+          // Deteksi apakah formatnya diawali Tahun (YYYY-MM-DD) atau Tanggal (DD/MM/YYYY)
+          if (dateTokens[0].length === 4) {
+             year = parseInt(dateTokens[0]);
+             month = parseInt(dateTokens[1]) - 1; // Bulan di JavaScript dimulai dari 0
+             day = parseInt(dateTokens[2]);
+          } else {
+             day = parseInt(dateTokens[0]);
+             month = parseInt(dateTokens[1]) - 1;
+             year = parseInt(dateTokens[2]);
+          }
+
+          // Pisahkan Jam:Menit:Detik
+          let timeTokens = timePart.split(':');
+          let hours = parseInt(timeTokens[0]) || 0;
+          let minutes = parseInt(timeTokens[1]) || 0;
+          let seconds = parseInt(timeTokens[2]) || 0;
+
+          let parsedDate = new Date(year, month, day, hours, minutes, seconds);
+          if (!isNaN(parsedDate.getTime())) return parsedDate;
+        }
+      }
+      return null;
+    }
+
+    async function fetchSchedule() {
+      if (isFetching) return;
+      isFetching = true;
+      try {
+        // Hapus cache buster karena kadang ditolak oleh Google
+        const response = await fetch(googleSheetCsvUrl);
+        
+        if (!response.ok) throw new Error('Gagal menghubungi Google Sheet');
+        
+        const data = await response.text();
+        const rows = data.split(/\n/);
+        
+        let newData = [];
+        
+        // Mulai dari 1 untuk melewati Header (baris pertama)
+        for (let i = 1; i < rows.length; i++) {
+          const rowText = rows[i];
+          if (!rowText.trim()) continue; // Abaikan baris kosong
+          
+          const cols = parseCSVLine(rowText);
+          
+          // Pastikan minimal ada nama pelajaran (Kolom 0)
+          if (cols.length >= 1 && cols[0] !== '') {
+            newData.push({
+              subject: cols[0],
+              url: cols[1] || '#',
+              releaseStr: cols[2] || null,
+              expireStr: cols[3] || null
+            });
+          }
+        }
+        
+        scheduleData = newData;
+        renderSchedule(); // Tampilkan segera setelah data didapat
+
+      } catch (error) {
+        console.error('Error Sync:', error);
+        if (scheduleData.length === 0) {
+          document.getElementById('jadwal-container').innerHTML = `
+            <div style="color: #fca5a5; width: 100%; text-align: center; display:flex; flex-direction:column; gap:10px;">
+              <span style="font-weight:bold; font-size: 16px;">⚠️ Gagal Menyinkronkan Jadwal</span>
+              <span style="font-size: 13px;">Pastikan koneksi internet stabil atau pengaturan Google Sheet Publik sudah benar.</span>
+            </div>`;
+        }
+      } finally {
+        isFetching = false;
+      }
+    }
+
+    function renderSchedule() {
+      const container = document.getElementById('jadwal-container');
+      const now = new Date();
+      
+      // Jika belum ada data sama sekali setelah fetch berjalan
+      if (scheduleData.length === 0 && !isFetching) {
+        container.innerHTML = `
+          <div style="color: #a0aec0; width: 100%; text-align: center; font-style: italic;">
+            Belum ada jadwal ujian yang tersedia.
+          </div>`;
+        return;
+      } else if (scheduleData.length === 0 && isFetching) {
+        return; // Masih loading awal
+      }
+      
+      container.innerHTML = ''; // Kosongkan container
+      
+      scheduleData.forEach(item => {
+        const releaseTime = parseCustomDate(item.releaseStr);
+        const expireTime = parseCustomDate(item.expireStr);
+        
+        let status = 'WAITING'; 
+        let statusText = 'BELUM MULAI';
+        let statusClass = 'status-waiting';
+
+        // Logika penentuan status waktu
+        if (releaseTime && expireTime) {
+          if (now < releaseTime) {
+            status = 'WAITING';
+            statusText = 'BELUM MULAI';
+            statusClass = 'status-waiting';
+          } else if (now >= expireTime) {
+            status = 'CLOSED';
+            statusText = 'DITUTUP';
+            statusClass = 'status-closed';
+          } else {
+            status = 'OPEN';
+            statusText = 'TERSEDIA';
+            statusClass = 'status-open';
+          }
+        } else {
+            // JIKA TANGGAL KOSONG DI SHEET: Defaultnya adalah WAITING (Belum Mulai)
+            status = 'WAITING';
+            statusText = 'BELUM MULAI';
+            statusClass = 'status-waiting';
+        }
+        
+        // Pembuatan elemen kartu ujian
+        const a = document.createElement('a');
+        a.className = `subject-box ${status !== 'OPEN' ? 'locked' : ''}`;
+        a.href = item.url;
+        
+        a.innerHTML = `
+          <div style="z-index: 2; margin-bottom: 2px;">${item.subject}</div>
+          <div class="status-badge ${statusClass}" style="z-index: 2;">${statusText}</div>
+        `;
+        
+        // Logika saat diklik
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          if (status === 'WAITING') {
+            showAlert("Ujian belum dimulai! Silakan tunggu waktu pelaksanaannya.");
+          } else if (status === 'CLOSED') {
+            showAlert("Ujian sudah ditutup!");
+          } else {
+            // Jika OPEN
+            if (item.url && item.url.includes('http')) {
+               openExamModal(item.url, item.subject);
+            } else {
+               showAlert("Link ujian belum tersedia!");
+            }
+          }
+        });
+
+        container.appendChild(a);
+      });
+    }
+
+    let confirmCallback = null;
+
+    function showConfirmModal(message, callback) {
+      document.getElementById('confirm-message').textContent = message;
+      document.getElementById('confirm-yes-btn').classList.remove('hidden');
+      document.getElementById('confirm-cancel-btn').textContent = "Batal";
+      document.getElementById('custom-confirm-modal').classList.remove('hidden');
+      confirmCallback = callback;
+    }
+
+    function showAlert(message) {
+      document.getElementById('confirm-message').textContent = message;
+      document.getElementById('confirm-yes-btn').classList.add('hidden'); // Sembunyikan tombol 'Ya'
+      document.getElementById('confirm-cancel-btn').textContent = "OK Mengerti";
+      document.getElementById('custom-confirm-modal').classList.remove('hidden');
+      confirmCallback = null;
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('custom-confirm-modal').classList.add('hidden');
+      confirmCallback = null;
+    }
+
+    document.getElementById('confirm-yes-btn').addEventListener('click', () => {
+      if (confirmCallback) confirmCallback();
+      closeConfirmModal();
+    });
+
+    function openExamModal(url, title) {
+      const modal = document.getElementById('exam-modal');
+      const iframe = document.getElementById('exam-iframe');
+      const titleDisplay = document.getElementById('exam-title-display');
+
+      if (titleDisplay) titleDisplay.textContent = title;
+      
+      let embedUrl = url;
+      // Perbaikan link khusus Google Form
+      if (embedUrl.includes('docs.google.com/forms') && !embedUrl.includes('embedded=true')) {
+        embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'embedded=true';
+      }
+
+      if (iframe) iframe.src = embedUrl;
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function requestCloseExam() {
+      showConfirmModal("Apakah Anda yakin ingin keluar dari lembar ujian dan kembali ke jadwal?", () => {
+        const modal = document.getElementById('exam-modal');
+        const iframe = document.getElementById('exam-iframe');
+        if (iframe) iframe.src = "";
+        if (modal) modal.classList.add('hidden');
+      });
+    }
+
+    function requestLogout() {
+      showConfirmModal("Apakah Anda yakin ingin keluar/logout dari aplikasi?", () => {
+        sessionStorage.removeItem("userNama");
+        window.location.href = "https://ekosantoso411-pixel.github.io/portal-login/"; 
+      });
     }
 
     function updateLiveClock() {
@@ -335,35 +710,15 @@
       }
     }
 
-    function updateSubjectLinks() {
-      const now = new Date();
-      const links = document.querySelectorAll('.subject-box');
-      links.forEach(link => {
-        const releaseTime = new Date(link.getAttribute('data-release'));
-        const expireTime = new Date(link.getAttribute('data-expire'));
-        if (now >= releaseTime && now < expireTime) {
-          link.classList.remove('hidden');
-        } else {
-          link.classList.add('hidden');
-        }
-      });
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      updateLiveClock();
-      updateSubjectLinks();
-      setInterval(updateLiveClock, 1000);
-      setInterval(updateSubjectLinks, 5000); 
-    });
-
-    // --- STREAMING_CHUNK:Initializing Canvas Animation... ---
     const canvas = document.getElementById('background-canvas');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas ? canvas.getContext('2d') : null;
+    
     let width, height;
     let particles = [];
     const connectionDistance = 150;
 
     function resizeCanvas() {
+      if (!canvas) return;
       width = window.innerWidth;
       height = window.innerHeight;
       canvas.width = width;
@@ -385,9 +740,10 @@
         if (this.y < 0 || this.y > height) this.vy *= -1;
       }
       draw() {
+        if (!ctx) return;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(212, 0, 255, 0.8)'; // Ungu Kelas 9
+        ctx.fillStyle = 'rgba(0, 195, 255, 0.8)';
         ctx.fill();
       }
     }
@@ -395,21 +751,25 @@
     function initParticles() {
       particles = [];
       const numberOfParticles = (width * height) / 25000;
-      for (let i = 0; i < numberOfParticles; i++) particles.push(new Particle());
+      for (let i = 0; i < numberOfParticles; i++) {
+        particles.push(new Particle());
+      }
     }
 
     function drawConnections() {
+      if (!ctx) return;
       for (let a = 0; a < particles.length; a++) {
         for (let b = a; b < particles.length; b++) {
           let dx = particles[a].x - particles[b].x;
           let dy = particles[a].y - particles[b].y;
           let distance = Math.sqrt(dx * dx + dy * dy);
+
           if (distance < connectionDistance) {
             ctx.beginPath();
             ctx.moveTo(particles[a].x, particles[a].y);
             ctx.lineTo(particles[b].x, particles[b].y);
             let opacity = 1 - (distance / connectionDistance);
-            ctx.strokeStyle = `rgba(212, 0, 255, ${opacity * 0.3})`;
+            ctx.strokeStyle = `rgba(0, 195, 255, ${opacity * 0.3})`;
             ctx.lineWidth = 1;
             ctx.stroke();
           }
@@ -418,25 +778,44 @@
     }
 
     function drawGrid() {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
-        ctx.lineWidth = 1;
-        const gridSize = 50;
-        ctx.beginPath();
-        for (let x = 0; x <= width; x += gridSize) { ctx.moveTo(x, 0); ctx.lineTo(x, height); }
-        for (let y = 0; y <= height; y += gridSize) { ctx.moveTo(0, y); ctx.lineTo(width, height); }
-        ctx.stroke();
+      if (!ctx) return;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+      ctx.lineWidth = 1;
+      const gridSize = 50;
+      ctx.beginPath();
+      for (let x = 0; x <= width; x += gridSize) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+      }
+      for (let y = 0; y <= height; y += gridSize) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, height);
+      }
+      ctx.stroke();
     }
 
     function animate() {
+      if (!ctx) return;
       requestAnimationFrame(animate);
       ctx.clearRect(0, 0, width, height);
       drawGrid();
-      particles.forEach(particle => { particle.update(); particle.draw(); });
+      particles.forEach(particle => {
+        particle.update();
+        particle.draw();
+      });
       drawConnections();
     }
 
-    window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
-    window.onload = function() { resizeCanvas(); initParticles(); animate(); };
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      initParticles();
+    });
+
+    window.onload = function() {
+      resizeCanvas();
+      initParticles();
+      animate();
+    };
   </script>
 </body>
 </html>
