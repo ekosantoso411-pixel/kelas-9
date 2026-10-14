@@ -191,24 +191,12 @@
       opacity: 0.5;
     }
 
-    .subject-box:hover:not(.locked) {
+    .subject-box:hover {
       background: linear-gradient(135deg, var(--hover-bg-bottom) 0%, var(--hover-bg-top) 100%);
       color: #ffffff;
       transform: translateY(-5px) scale(1.02);
       border-color: var(--primary-color);
       box-shadow: 0 8px 25px var(--primary-glow), 0 0 10px rgba(0, 195, 255, 0.2);
-    }
-
-    .subject-box.locked {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      color: #64748b;
-      border: 1px solid #334155;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-    
-    .subject-box.locked::before {
-      display: none;
     }
 
     .status-badge {
@@ -221,8 +209,6 @@
     }
 
     .status-open { background: rgba(0, 195, 255, 0.15); color: #00c3ff; border: 1px solid rgba(0,195,255,0.3); }
-    .status-waiting { background: rgba(245, 158, 11, 0.1); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .status-closed { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
 
     .loading-text {
       color: var(--primary-color);
@@ -441,7 +427,6 @@
       let ret = [];
       let inQuote = false;
       let value = '';
-      // Bersihkan tanda \r yang tersembunyi dari Windows/Sheet
       text = text.replace(/\r/g, ''); 
       
       for (let i = 0; i < text.length; i++) {
@@ -466,25 +451,22 @@
       if (!dateStr || dateStr.trim() === '') return null;
       let str = dateStr.trim();
       
-      // 1. Coba format standar internasional dulu
       let d = new Date(str);
       if (!isNaN(d.getTime()) && str.includes('T')) return d;
 
-      // 2. Jika gagal, coba pecah manual format Indonesia (DD/MM/YYYY HH:mm:ss atau YYYY-MM-DD HH:mm)
-      let parts = str.split(/[\sT]+/); // Pisahkan tanggal dan jam
+      let parts = str.split(/[\sT]+/);
       if (parts.length >= 1) {
         let datePart = parts[0];
-        let timePart = parts[1] || "00:00:00"; // Jika tidak ada jam, anggap 00:00:00
+        let timePart = parts[1] || "00:00:00"; 
         
-        let dateTokens = datePart.split(/[-/]/); // Pemisah bisa - atau /
+        let dateTokens = datePart.split(/[-/]/); 
         
         if (dateTokens.length === 3) {
           let year, month, day;
           
-          // Deteksi apakah formatnya diawali Tahun (YYYY-MM-DD) atau Tanggal (DD/MM/YYYY)
           if (dateTokens[0].length === 4) {
              year = parseInt(dateTokens[0]);
-             month = parseInt(dateTokens[1]) - 1; // Bulan di JavaScript dimulai dari 0
+             month = parseInt(dateTokens[1]) - 1;
              day = parseInt(dateTokens[2]);
           } else {
              day = parseInt(dateTokens[0]);
@@ -492,7 +474,6 @@
              year = parseInt(dateTokens[2]);
           }
 
-          // Pisahkan Jam:Menit:Detik
           let timeTokens = timePart.split(':');
           let hours = parseInt(timeTokens[0]) || 0;
           let minutes = parseInt(timeTokens[1]) || 0;
@@ -509,7 +490,6 @@
       if (isFetching) return;
       isFetching = true;
       try {
-        // Hapus cache buster karena kadang ditolak oleh Google
         const response = await fetch(googleSheetCsvUrl);
         
         if (!response.ok) throw new Error('Gagal menghubungi Google Sheet');
@@ -519,14 +499,12 @@
         
         let newData = [];
         
-        // Mulai dari 1 untuk melewati Header (baris pertama)
         for (let i = 1; i < rows.length; i++) {
           const rowText = rows[i];
-          if (!rowText.trim()) continue; // Abaikan baris kosong
+          if (!rowText.trim()) continue; 
           
           const cols = parseCSVLine(rowText);
           
-          // Pastikan minimal ada nama pelajaran (Kolom 0)
           if (cols.length >= 1 && cols[0] !== '') {
             newData.push({
               subject: cols[0],
@@ -538,7 +516,7 @@
         }
         
         scheduleData = newData;
-        renderSchedule(); // Tampilkan segera setelah data didapat
+        renderSchedule(); 
 
       } catch (error) {
         console.error('Error Sync:', error);
@@ -558,79 +536,77 @@
       const container = document.getElementById('jadwal-container');
       const now = new Date();
       
-      // Jika belum ada data sama sekali setelah fetch berjalan
       if (scheduleData.length === 0 && !isFetching) {
         container.innerHTML = `
           <div style="color: #a0aec0; width: 100%; text-align: center; font-style: italic;">
-            Belum ada jadwal ujian yang tersedia.
+            Belum ada jadwal ujian di database.
           </div>`;
         return;
       } else if (scheduleData.length === 0 && isFetching) {
-        return; // Masih loading awal
+        return; 
       }
       
-      container.innerHTML = ''; // Kosongkan container
-      
+      container.innerHTML = ''; 
+      let activeSubjectsCount = 0; // Menghitung berapa banyak ujian yang TERSEDIA
+
       scheduleData.forEach(item => {
         const releaseTime = parseCustomDate(item.releaseStr);
         const expireTime = parseCustomDate(item.expireStr);
         
         let status = 'WAITING'; 
-        let statusText = 'BELUM MULAI';
-        let statusClass = 'status-waiting';
 
         // Logika penentuan status waktu
         if (releaseTime && expireTime) {
           if (now < releaseTime) {
             status = 'WAITING';
-            statusText = 'BELUM MULAI';
-            statusClass = 'status-waiting';
           } else if (now >= expireTime) {
             status = 'CLOSED';
-            statusText = 'DITUTUP';
-            statusClass = 'status-closed';
           } else {
             status = 'OPEN';
-            statusText = 'TERSEDIA';
-            statusClass = 'status-open';
           }
         } else {
             // JIKA TANGGAL KOSONG DI SHEET: Defaultnya adalah WAITING (Belum Mulai)
             status = 'WAITING';
-            statusText = 'BELUM MULAI';
-            statusClass = 'status-waiting';
         }
         
-        // Pembuatan elemen kartu ujian
+        // HANYA MUNCULKAN MAPEL JIKA STATUSNYA "OPEN"
+        if (status !== 'OPEN') {
+           return; // Lanjutkan ke mapel berikutnya, jangan render yang ini
+        }
+        
+        activeSubjectsCount++; // Tambah hitungan ujian aktif
+
+        // Pembuatan elemen kartu ujian (Semua yang lolos filter pasti terbuka)
         const a = document.createElement('a');
-        a.className = `subject-box ${status !== 'OPEN' ? 'locked' : ''}`;
+        a.className = `subject-box`;
         a.href = item.url;
         
         a.innerHTML = `
           <div style="z-index: 2; margin-bottom: 2px;">${item.subject}</div>
-          <div class="status-badge ${statusClass}" style="z-index: 2;">${statusText}</div>
+          <div class="status-badge status-open" style="z-index: 2;">TERSEDIA</div>
         `;
         
         // Logika saat diklik
         a.addEventListener('click', (e) => {
           e.preventDefault();
-          
-          if (status === 'WAITING') {
-            showAlert("Ujian belum dimulai! Silakan tunggu waktu pelaksanaannya.");
-          } else if (status === 'CLOSED') {
-            showAlert("Ujian sudah ditutup!");
+          if (item.url && item.url.includes('http')) {
+             openExamModal(item.url, item.subject);
           } else {
-            // Jika OPEN
-            if (item.url && item.url.includes('http')) {
-               openExamModal(item.url, item.subject);
-            } else {
-               showAlert("Link ujian belum tersedia!");
-            }
+             showAlert("Link ujian belum tersedia!");
           }
         });
 
         container.appendChild(a);
       });
+
+      // Tampilkan pesan khusus jika tidak ada satupun ujian yang sedang OPEN
+      if (activeSubjectsCount === 0) {
+        container.innerHTML = `
+          <div style="color: #a0aec0; width: 100%; text-align: center; font-style: italic; padding: 20px;">
+            Belum ada ujian yang tersedia saat ini.<br/>
+            <span style="font-size: 13px; opacity: 0.7;">Tunggu sesuai jadwal ujian yang telah ditentukan.</span>
+          </div>`;
+      }
     }
 
     let confirmCallback = null;
@@ -645,7 +621,7 @@
 
     function showAlert(message) {
       document.getElementById('confirm-message').textContent = message;
-      document.getElementById('confirm-yes-btn').classList.add('hidden'); // Sembunyikan tombol 'Ya'
+      document.getElementById('confirm-yes-btn').classList.add('hidden'); 
       document.getElementById('confirm-cancel-btn').textContent = "OK Mengerti";
       document.getElementById('custom-confirm-modal').classList.remove('hidden');
       confirmCallback = null;
@@ -669,7 +645,6 @@
       if (titleDisplay) titleDisplay.textContent = title;
       
       let embedUrl = url;
-      // Perbaikan link khusus Google Form
       if (embedUrl.includes('docs.google.com/forms') && !embedUrl.includes('embedded=true')) {
         embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'embedded=true';
       }
